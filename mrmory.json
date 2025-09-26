@@ -1,0 +1,9 @@
+{
+  "history": [],
+  "weights": {
+    "emocje": 3,
+    "neuroplastyczność": 2,
+    "świadomość": 1
+  },
+  "max_entries": 200
+}

@@ -1,0 +1,11 @@
+
+# Core requirements for NeuroQuantumAI Android App
+kivy==2.2.1
+buildozer
+plyer
+requests
+setuptools==65.5.1
+cython
+# Optional: numpy, scipy, etc. if used in AI modules
+# numpy
+# scipy

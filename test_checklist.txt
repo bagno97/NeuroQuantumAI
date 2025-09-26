@@ -1,0 +1,48 @@
+# NeuroQuantumAI — Lista kontrolna testów końcowych
+
+## 1. Uruchomienie i środowisko
+- [ ] Python 3.11+ zainstalowany
+- [ ] Wszystkie wymagane pakiety zainstalowane (`pip install -r requirements.txt` + `flask`)
+- [ ] Test środowiska (`sprawdź środowisko AI` w AIEngine lub system_requirements.py)
+- [ ] (Opcjonalnie) Termux na Androidzie — Python, pip, Flask, uprawnienia do plików
+
+## 2. Podstawowe funkcje AI
+- [ ] AI odpowiada na pytania i prowadzi rozmowę
+- [ ] Historia rozmów zapisywana w plikach
+- [ ] Analiza emocji i wzmocnień działa
+- [ ] Dynamiczne rozbudowywanie sieci i synaps
+- [ ] Generowanie nowych modułów tematycznych
+
+## 3. Fact-checking i detekcja dezinformacji
+- [ ] AI ostrzega o potencjalnej dezinformacji
+- [ ] Integracja z fact_checker.py działa (test: podaj kontrowersyjne twierdzenie)
+- [ ] Wyniki z API fact-checkingowego prezentowane w odpowiedzi
+
+## 4. Samomodyfikacja i rozbudowa kodu
+- [ ] AI prosi o zgodę na modyfikację kodu
+- [ ] Po zgodzie — potrafi dodać/zmienić kod (test: komenda „rozbuduj kod ai ...”)
+- [ ] Tworzenie kopii zapasowych i logowanie zmian
+
+## 5. Terminal i środowisko uruchomieniowe
+- [ ] ai_shell.py — lokalny terminal działa (test: polecenia systemowe i Python)
+- [ ] ai_web_shell.py — webowy terminal działa w przeglądarce (test: polecenia systemowe i Python)
+- [ ] Ostrzeżenia o ograniczeniach środowiska pojawiają się, gdy coś nie działa
+
+## 6. Integracja z funkcjami telefonu (jeśli w Termux/Android)
+- [ ] Kamera, GPS, SMS, powiadomienia — test przez polecenia AI
+- [ ] AI potrafi pobierać dane z internetu i zapisywać wyniki
+
+## 7. Dokumentacja i rozszerzalność
+- [ ] README.md zawiera pełne instrukcje i opis architektury
+- [ ] Każdy plik i klasa posiada docstringi i typowanie
+- [ ] Możliwość łatwego dodania nowych modułów i funkcji
+
+## 8. Testy końcowe
+- [ ] Przeprowadź rozmowę testową (min. 10 interakcji)
+- [ ] Przetestuj rozbudowę kodu i fact-checking
+- [ ] Przetestuj środowisko webowe i lokalne
+- [ ] Sprawdź logi, kopie zapasowe i pliki pamięci
+
+---
+
+**Jeśli wszystkie punkty są odhaczone — AI jest gotowa do produkcji lub dalszego rozwoju!**

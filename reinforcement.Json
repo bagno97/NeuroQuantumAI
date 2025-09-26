@@ -1,0 +1,17 @@
+{
+  "emocje": {
+    "waga": 3,
+    "trigger": ["radość", "gniew", "ciekawość", "smutek"],
+    "modulacja": "silna"
+  },
+  "neuroplastyczność": {
+    "waga": 2,
+    "adaptacja": true,
+    "threshold_powtórzeń": 3
+  },
+  "świadomość": {
+    "waga": 1,
+    "filtr_kontekstowy": true,
+    "poziom": "niski"
+  }
+}
