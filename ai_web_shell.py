@@ -6,14 +6,24 @@ Pozwala na uruchamianie poleceń Pythona i systemowych przez przeglądarkę tele
 Integruje się z istniejącymi modułami (AIEngine, ai_shell, fact_checker, system_requirements).
 """
 
-from flask import Flask, request, render_template_string
+import importlib
+try:
+    _flask = importlib.import_module('flask')
+    Flask = _flask.Flask
+    request = _flask.request
+    render_template_string = _flask.render_template_string
+except Exception:  # Flask może nie być zainstalowany w środowisku analizy
+    Flask = None
+    request = None
+    def render_template_string(*args, **kwargs):
+        return "Flask nie jest zainstalowany. Zainstaluj pakiet 'flask' aby uruchomić AI Web Shell."
 import subprocess
 import sys
 import code
 import threading
 import traceback
 
-app = Flask(__name__)
+app = Flask(__name__) if Flask else None
 
 HTML = """
 <!DOCTYPE html>
@@ -47,36 +57,44 @@ HTML = """
 # Kontekst Pythona dla AI (dzielony między sesjami)
 ai_locals = {}
 
-@app.route('/', methods=['GET', 'POST'])
-def shell():
-    output = ''
-    warning = ''
-    command = ''
-    if request.method == 'POST':
-        command = request.form.get('command', '').strip()
-        if command:
-            if command.startswith('py '):
-                try:
-                    exec(command[3:], ai_locals)
-                    output = ai_locals.get('_', '')
-                except Exception as e:
-                    output = f"[AI Web Shell] Błąd Pythona: {e}\n" + traceback.format_exc()
-            else:
-                try:
-                    result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=10)
-                    output = result.stdout + (result.stderr if result.stderr else '')
-                except Exception as e:
-                    output = f"[AI Web Shell] Błąd systemu: {e}"
-        # Ostrzeżenie jeśli środowisko nie pozwala na pełną samomodyfikację
-        try:
-            from system_requirements import environment_report
-            env_report = environment_report()
-            if 'BRAK' in env_report:
-                warning = '[UWAGA] Środowisko nie pozwala na pełną samomodyfikację AI!\n' + env_report
-        except Exception:
-            warning = '[UWAGA] Nie można sprawdzić środowiska.'
-    return render_template_string(HTML, output=output, warning=warning, command=command)
+if app:
+    @app.route('/', methods=['GET', 'POST'])
+    def shell():
+        output = ''
+        warning = ''
+        command = ''
+        if request.method == 'POST':
+            command = request.form.get('command', '').strip()
+            if command:
+                if command.startswith('py '):
+                    try:
+                        exec(command[3:], ai_locals)
+                        output = ai_locals.get('_', '')
+                    except Exception as e:
+                        output = f"[AI Web Shell] Błąd Pythona: {e}\n" + traceback.format_exc()
+                else:
+                    try:
+                        result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=10)
+                        output = result.stdout + (result.stderr if result.stderr else '')
+                    except Exception as e:
+                        output = f"[AI Web Shell] Błąd systemu: {e}"
+            # Ostrzeżenie jeśli środowisko nie pozwala na pełną samomodyfikację
+            try:
+                from system_requirements import environment_report
+                env_report = environment_report()
+                if 'BRAK' in env_report:
+                    warning = '[UWAGA] Środowisko nie pozwala na pełną samomodyfikację AI!\n' + env_report
+            except Exception:
+                warning = '[UWAGA] Nie można sprawdzić środowiska.'
+        return render_template_string(HTML, output=output, warning=warning, command=command)
+
+else:
+    def shell():
+        return "Flask nie jest zainstalowany. Uruchom: pip install flask"
 
 if __name__ == '__main__':
-    print("[AI Web Shell] Uruchom na telefonie lub komputerze: http://localhost:5000/")
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    if app:
+        print("[AI Web Shell] Uruchom na telefonie lub komputerze: http://localhost:5000/")
+        app.run(host='0.0.0.0', port=5000, debug=False)
+    else:
+        print("[AI Web Shell] Flask nie jest zainstalowany. Uruchom: pip install flask")

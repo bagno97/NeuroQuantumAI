@@ -58,6 +58,54 @@ def check_terminal_access() -> bool:
     except Exception:
         return False
 
+def find_writable_dirs() -> list:
+    """
+    Znajduje katalogi dostępne do zapisu w różnych środowiskach (Android, Linux, Windows).
+    Zwraca listę ścieżek, które mogą być użyte do przechowywania dynamicznie tworzonych modułów.
+    """
+    writable_dirs = []
+    
+    # Sprawdź katalogi specyficzne dla Androida
+    android_dirs = [
+        "/data/data/org.test.neuroquantumai/files",  # Zmień na właściwą nazwę pakietu
+        "/storage/emulated/0/Android/data/org.test.neuroquantumai/files",
+        "/sdcard/Android/data/org.test.neuroquantumai/files"
+    ]
+    
+    # Sprawdź katalogi na różnych systemach
+    system_dirs = [
+        ".",  # Bieżący katalog
+        os.path.join(os.path.expanduser("~"), "NeuroQuantumAI_modules"),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "dynamic_modules"),
+        "/tmp/neuroquantumai"  # Dla systemów Unix/Linux
+    ]
+    
+    # Sprawdź wszystkie możliwe katalogi
+    all_dirs = android_dirs + system_dirs
+    
+    for directory in all_dirs:
+        try:
+            # Utwórz katalog, jeśli nie istnieje
+            os.makedirs(directory, exist_ok=True)
+            
+            # Sprawdź, czy można w nim zapisywać
+            if check_filesystem_access(directory):
+                writable_dirs.append(directory)
+        except Exception:
+            pass
+    
+    return writable_dirs
+
+def get_best_dynamic_dir() -> str:
+    """
+    Zwraca najlepszy katalog do przechowywania dynamicznie generowanych modułów.
+    """
+    dirs = find_writable_dirs()
+    if dirs:
+        return dirs[0]  # Pierwszy znaleziony katalog z dostępem do zapisu
+    else:
+        return "."  # Bieżący katalog jako ostateczność
+
 def environment_report() -> str:
     """
     Zwraca raport o możliwościach środowiska do samomodyfikacji AI.
@@ -67,4 +115,11 @@ def environment_report() -> str:
     report.append(f"Python interpreter: {'OK' if check_python_interpreter() else 'BRAK'}")
     report.append(f"System tools (shutil, subprocess, os, sys): {'OK' if check_system_tools() else 'BRAK'}")
     report.append(f"Terminal access: {'OK' if check_terminal_access() else 'BRAK'}")
+    
+    # Dodaj informacje o katalogach dostępnych do zapisu
+    writable_dirs = find_writable_dirs()
+    report.append(f"Writable directories: {len(writable_dirs)} found")
+    for directory in writable_dirs:
+        report.append(f"  - {directory}")
+    
     return "\n".join(report)

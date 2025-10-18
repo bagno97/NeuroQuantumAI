@@ -19,9 +19,22 @@ class SelfUpdater:
 	"""
 	Provides methods for appending, inserting, and creating code modules with backup and logging.
 	"""
+	def __init__(self):
+		"""
+		Inicjalizuje SelfUpdater i importuje menedżer modułów dynamicznych.
+		"""
+		try:
+			from dynamic_loader import dynamic_module_manager
+			self.dynamic_manager = dynamic_module_manager
+		except ImportError:
+			self.dynamic_manager = None
+			print("[SelfUpdater] UWAGA: Menedżer modułów dynamicznych niedostępny")
+	
 	def append_to_file(self, file_path: str, code_snippet: str) -> None:
 		"""
 		Append a code snippet to a file, backup the original, and log the update.
+		If standard file access fails, try to use dynamic_loader as a fallback.
+		
 		Args:
 			file_path (str): Path to the file to update.
 			code_snippet (str): Code to append.
@@ -32,13 +45,39 @@ class SelfUpdater:
 				f.write("\n# === AI Update ===\n" + code_snippet + "\n")
 			print(f"[AI] Plik zaktualizowany: {file_path}")
 			self.log_update(file_path, "append", code_snippet)
-		except Exception as e:
+		except (IOError, PermissionError) as e:
+			# Spróbuj użyć mechanizmu modułów dynamicznych jako alternatywy
+			if self.dynamic_manager is not None:
+				module_name = os.path.splitext(os.path.basename(file_path))[0]
+				try:
+					# Odczytaj oryginalny kod, jeśli możliwe
+					try:
+						with open(file_path, "r", encoding="utf-8") as f:
+							original_code = f.read()
+					except:
+						original_code = f"# Original content unavailable\n# Generated for: {file_path}\n"
+					
+					# Utwórz nową wersję z dodanym kodem
+					new_code = original_code + "\n# === AI Update ===\n" + code_snippet + "\n"
+					
+					# Zapisz jako dynamiczny moduł
+					success = self.dynamic_manager.create_module(f"dynamic_{module_name}", new_code)
+					if success:
+						print(f"[AI] Plik zaktualizowany dynamicznie: {module_name}")
+						self.log_update(f"dynamic:{module_name}", "append_dynamic", code_snippet)
+						return
+				except Exception as inner_e:
+					print(f"[AI] Błąd dynamicznego tworzenia modułu: {inner_e}")
+			
+			# Jeśli wszystko zawiedzie, zgłoś oryginalny błąd
 			print("Błąd aktualizacji:", e)
 			traceback.print_exc()
 
 	def create_new_module(self, module_name: str, code_content: str) -> None:
 		"""
 		Create a new Python module with the given code content and log the creation.
+		If standard file access fails, try to use dynamic_loader as a fallback.
+		
 		Args:
 			module_name (str): Name of the new module (without .py).
 			code_content (str): Code to write to the new module.
@@ -49,7 +88,19 @@ class SelfUpdater:
 				f.write(code_content)
 			print(f"[AI] Utworzono nowy moduł: {filename}")
 			self.log_update(filename, "create", code_content)
-		except Exception as e:
+		except (IOError, PermissionError) as e:
+			# Spróbuj użyć mechanizmu modułów dynamicznych jako alternatywy
+			if self.dynamic_manager is not None:
+				try:
+					success = self.dynamic_manager.create_module(module_name, code_content)
+					if success:
+						print(f"[AI] Utworzono dynamiczny moduł: {module_name}")
+						self.log_update(f"dynamic:{module_name}", "create_dynamic", code_content)
+						return
+				except Exception as inner_e:
+					print(f"[AI] Błąd dynamicznego tworzenia modułu: {inner_e}")
+			
+			# Jeśli wszystko zawiedzie, zgłoś oryginalny błąd
 			print("Błąd tworzenia modułu:", e)
 			traceback.print_exc()
 

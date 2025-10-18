@@ -6,16 +6,25 @@ Wymaga interakcji użytkownika i pliku credentials.json (Google Cloud OAuth2).
 """
 
 import os
+import importlib
 from typing import List
 
 try:
-    from googleapiclient.discovery import build
-    from googleapiclient.http import MediaIoBaseDownload
-    from google_auth_oauthlib.flow import InstalledAppFlow
-    from google.auth.transport.requests import Request
-    import pickle
-except ImportError:
+    _gapiclient = importlib.import_module('googleapiclient.discovery')
+    build = _gapiclient.build
+    _gapiclient_http = importlib.import_module('googleapiclient.http')
+    MediaIoBaseDownload = getattr(_gapiclient_http, 'MediaIoBaseDownload', None)
+    _oauth_flow = importlib.import_module('google_auth_oauthlib.flow')
+    InstalledAppFlow = getattr(_oauth_flow, 'InstalledAppFlow', None)
+    _gauth_requests = importlib.import_module('google.auth.transport.requests')
+    Request = getattr(_gauth_requests, 'Request', None)
+    import pickle  # noqa: F401
+except Exception:
     build = None  # Google API nie jest zainstalowane
+    MediaIoBaseDownload = None  # type: ignore
+    InstalledAppFlow = None  # type: ignore
+    Request = None  # type: ignore
+    pickle = None  # type: ignore
 
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 CREDENTIALS_FILE = 'credentials.json'

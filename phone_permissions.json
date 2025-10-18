@@ -1,0 +1,21 @@
+{
+  "camera": true,
+  "location": true,
+  "sms": true,
+  "calls": true,
+  "contacts": true,
+  "files": true,
+  "notifications": true,
+  "bluetooth": true,
+  "wifi": true,
+  "microphone": true,
+  "sensors": true,
+  "battery": true,
+  "system_info": true,
+  "internet": true,
+  "storage": true,
+  "clipboard": true,
+  "last_updated": "2025-01-10T00:00:00Z",
+  "unlimited_mode": true,
+  "ai_autonomy_level": "maximum"
+}

@@ -1,11 +1,23 @@
 
-# Core requirements for NeuroQuantumAI Android App
-kivy==2.2.1
-buildozer
-plyer
-requests
+# Core requirements for host tooling (do not install Kivy here)
+buildozer==1.5.0
 setuptools==65.5.1
-cython
-# Optional: numpy, scipy, etc. if used in AI modules
-# numpy
-# scipy
+packaging
+cython==0.29.36
+requests
+plyer
+# Extended phone interface dependencies
+flask
+pyjnius  # For Android native APIs
+jnius    # Android bindings
+python-for-android  # P4A for advanced Android features
+# AI and processing libraries
+numpy    # Mathematical operations
+scipy    # Scientific computing (optional but useful)
+# Additional utilities for full phone access
+pyserial  # Serial communication
+bluetooth-python  # Bluetooth control (Linux/Android)
+# Optional: specialized libraries
+# opencv-python  # Computer vision (heavy, add if needed)
+# tensorflow-lite  # AI models (mobile optimized)
+# sqlite3  # Database (usually built-in)

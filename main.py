@@ -18,7 +18,7 @@ class ChatBox(BoxLayout):
 
     def send_message(self):
         """
-        Obsługuje wysyłanie wiadomości przez użytkownika i aktualizuje interfejs.
+        ROZSZERZONA obsługa wysyłania wiadomości - teraz z pełną funkcjonalnością!
         """
         user_text = self.ids.user_input.text.strip()
         if not user_text:
@@ -26,12 +26,26 @@ class ChatBox(BoxLayout):
         try:
             # === Przetwarzanie wiadomości przez AIEngine ===
             response = self.engine.process_input(user_text)
+            
+            # === Sprawdź czy to komenda telefonu/samomodyfikacji ===
+            phone_keywords = ["zrób zdjęcie", "lokalizacja", "sms", "bateria", "wifi"]
+            mod_keywords = ["modyfikuj", "utwórz moduł", "dodaj funkcję"]
+            
+            if any(kw in user_text.lower() for kw in phone_keywords):
+                response = "📱 " + response
+            elif any(kw in user_text.lower() for kw in mod_keywords):
+                response = "🔧 " + response
+                
         except Exception as e:
-            response = f"[Błąd AI] {e}"
+            response = f"❌ [Błąd AI] {e}"
 
-        # === Aktualizacja interfejsu ===
-        self.ids.chat_log.text += f"\nUser: {user_text}\nAI:   {response}\n"
+        # === Aktualizacja interfejsu z kolorami ===
+        self.ids.chat_log.text += f"\n👤 User: {user_text}\n🤖 AI: {response}\n{'-'*50}"
         self.ids.user_input.text = ""
+    
+    # Alias dla kompatybilności z .kv
+    def send(self):
+        self.send_message()
 
 class NeuroQuantumAIApp(App):
     """
