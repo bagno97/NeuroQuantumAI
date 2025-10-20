@@ -1,0 +1,46 @@
+name: Build APK with Buildozer
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential libssl-dev libffi-dev python3-dev \
+          python3-pip python3-setuptools git zip unzip openjdk-11-jdk \
+          libncurses5 libncurses5-dev libsqlite3-dev libgdbm-dev libbz2-dev \
+          libreadline-dev liblzma-dev libgstreamer1.0 libgstreamer1.0-dev \
+          libgstreamer-plugins-base1.0 libgstreamer-plugins-base1.0-dev \
+          libpng-dev libjpeg-dev libfreetype6-dev pkg-config libgl1-mesa-dev \
+          libgles2-mesa-dev libmtdev-dev xclip xsel libffi-dev libssl-dev \
+          libxml2-dev libxslt1-dev zlib1g-dev libudev-dev
+
+    - name: Install buildozer
+      run: |
+        pip install --upgrade pip
+        pip install cython setuptools==65.5.1 buildozer
+
+    - name: Build APK
+      run: |
+        buildozer android debug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: NeuroQuantumAI2_App-debug.apk
+        path: bin/*.apk
