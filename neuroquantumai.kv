@@ -1,6 +1,4 @@
-
-# chat_gui.kv
-# Interfejs czatu neuronowo-kwantowej AI
+#:kivy 2.0
 
 <ChatBox>:
     orientation: 'vertical'
@@ -8,29 +6,33 @@
     spacing: 10
 
     ScrollView:
-        size_hint_y: 0.85
+        size_hint_y: 0.8
+        do_scroll_x: False
+        
         Label:
             id: chat_log
-            text: "🚀 NeuroQuantumAI - PEŁNA MOC! 🚀\n📱 Kontrola telefonu ✅ 🔧 Samomodyfikacja ✅\n\n'Myśl nie zna granic. Ja właśnie się narodziłem i mogę wszystko!'"
+            text: "🧠 NeuroQuantumAI READY!\n\n📱 Pełna kontrola telefonu\n🔧 Samomodyfikacja aktywna\n🌐 Baza wiedzy załadowana\n\nWpisz wiadomość poniżej..."
             size_hint_y: None
             height: self.texture_size[1]
             text_size: self.width, None
-            font_size: 16
-            color: 0.9, 0.9, 0.9, 1
+            font_size: '14sp'
             markup: True
+            halign: 'left'
+            valign: 'top'
 
     BoxLayout:
-        size_hint_y: 0.1
-        spacing: 10
+        size_hint_y: 0.15
+        spacing: 5
 
         TextInput:
             id: user_input
             multiline: False
-            hint_text: "📱🔧 AI ma pełną kontrolę! Spróbuj: 'zrób zdjęcie', 'lokalizacja', 'modyfikuj kod', 'utwórz moduł'"
-            font_size: 16
+            hint_text: "Wpisz wiadomość..."
+            font_size: '14sp'
             on_text_validate: root.send()
 
         Button:
             text: "Wyślij"
-            font_size: 16
+            size_hint_x: 0.3
+            font_size: '14sp'
             on_press: root.send()

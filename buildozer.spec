@@ -7,30 +7,30 @@
 title = NeuroQuantumAI
 
 
-# Unikalna nazwa paczki (zmień na własną domenę)
+# Unikalna nazwa paczki
 package.name = neuroquantumai
-package.domain = com.example
+package.domain = com.neuroquantum
 
 
-# Główne źródła - WSZYSTKIE pliki aplikacji!
+# WSZYSTKIE ŹRÓDŁA - pełna aplikacja AI!
 source.dir = .
-source.include_exts = py,png,jpg,jpeg,gif,bmp,kv,atlas,json,txt,md,sh,spec,Json,log,cfg,ini,yaml,yml,xml,csv,dat
+source.include_exts = py,png,jpg,jpeg,kv,json,txt
 
 
 # Ikona aplikacji
-icon.filename = %(source.dir)s/icon.png
+# icon.filename = %(source.dir)s/icon.png
 
 
-# Główny plik startowy
-source.include_entrypoint = True
+# Główny plik startowy - wersja Android
+source.main = main_android_fixed.py
 
 
-# Typ kompilacji: debug/release
-version = 0.2
-# Dodaj zależności pip wymagane przez AI - zoptymalizowane dla Samsung Galaxy A35 5G
-# ROZSZERZONE ZALEŻNOŚCI - pełna funkcjonalność AI + telefon!
-# comma separated e.g. requirements = sqlite3,kivy
-requirements = python3==3.9.17,hostpython3==3.9.17,setuptools,kivy==2.1.0,requests,plyer,pillow==8.4.0,urllib3,certifi,pyjnius,android,sqlite3,openssl,libffi,flask
+# Wersja aplikacji
+version = 1.0
+
+
+# PEŁNE ZALEŻNOŚCI - wszystkie moduły AI + telefon + samomodyfikacja
+requirements = python3,kivy==2.2.0,requests,plyer,pyjnius,android,certifi,urllib3,pillow
 
 
 # Target Android
@@ -46,8 +46,9 @@ android.ndk = 25b
 android.archs = arm64-v8a
 
 
-# PEŁNE UPRAWNIENIA ANDROID - AI ma dostęp do wszystkich funkcji telefonu!
-android.permissions = INTERNET, CAMERA, ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION, RECORD_AUDIO, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, READ_CONTACTS, WRITE_CONTACTS, SEND_SMS, RECEIVE_SMS, READ_SMS, CALL_PHONE, READ_CALL_LOG, WRITE_CALL_LOG, READ_PHONE_STATE, MODIFY_AUDIO_SETTINGS, ACCESS_NETWORK_STATE, ACCESS_WIFI_STATE, CHANGE_WIFI_STATE, BLUETOOTH, BLUETOOTH_ADMIN, VIBRATE, WAKE_LOCK, SYSTEM_ALERT_WINDOW, ACCESS_NOTIFICATION_POLICY, BIND_NOTIFICATION_LISTENER_SERVICE, READ_PHONE_NUMBERS, ANSWER_PHONE_CALLS, USE_FINGERPRINT, FOREGROUND_SERVICE, REQUEST_INSTALL_PACKAGES, MANAGE_EXTERNAL_STORAGE, ALL_FILES_ACCESS, READ_MEDIA_IMAGES, READ_MEDIA_VIDEO, READ_MEDIA_AUDIO
+# PEŁNE UPRAWNIENIA ANDROID - AI ma dostęp do WSZYSTKICH funkcji telefonu!
+# Zgodnie z phone_interface.py i phone_permissions.json
+android.permissions = INTERNET,CAMERA,ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,RECORD_AUDIO,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,READ_CONTACTS,WRITE_CONTACTS,SEND_SMS,RECEIVE_SMS,READ_SMS,CALL_PHONE,READ_CALL_LOG,WRITE_CALL_LOG,READ_PHONE_STATE,MODIFY_AUDIO_SETTINGS,ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_STATE,BLUETOOTH,BLUETOOTH_ADMIN,VIBRATE,WAKE_LOCK,FOREGROUND_SERVICE,READ_MEDIA_IMAGES,READ_MEDIA_VIDEO,READ_MEDIA_AUDIO
 
 [buildozer]
 log_level = 2
