@@ -1,0 +1,151 @@
+name: Build NeuroQuantumAI APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install system dependencies
+      run: |
+        sudo apt update -y
+        sudo apt install -y openjdk-11-jdk unzip zip wget python3-pip \
+          build-essential ccache git zlib1g-dev libncurses5-dev \
+          libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev \
+          autoconf libtool pkg-config
+
+    - name: Install Android command line tools
+      run: |
+        mkdir -p $HOME/android/cmdline-tools
+        cd $HOME/android
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip -q -o commandlinetools-linux-9477386_latest.zip -d cmdline-tools-temp
+        mkdir -p cmdline-tools/latest
+        mv cmdline-tools-temp/cmdline-tools/* cmdline-tools/latest/
+        rm -rf cmdline-tools-temp
+        echo "ANDROID_SDK_ROOT=$HOME/android" >> $GITHUB_ENV
+        echo "$HOME/android/cmdline-tools/latest/bin" >> $GITHUB_PATH
+        echo "$HOME/android/platform-tools" >> $GITHUB_PATH
+        echo "$HOME/android/build-tools/33.0.2" >> $GITHUB_PATH
+
+    - name: Accept Android licenses and install SDK components
+      run: |
+        export ANDROID_SDK_ROOT=$HOME/android
+        yes | $HOME/android/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        $HOME/android/cmdline-tools/latest/bin/sdkmanager --install \
+          "platform-tools" \
+          "platforms;android-33" \
+          "build-tools;33.0.2" \
+          "ndk;25.2.9519653"
+
+    - name: Setup Python and Buildozer
+      run: |
+        python3 -m pip install --upgrade pip
+        python3 -m pip install --user buildozer==1.5.0 cython==0.29.36 setuptools
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Verify buildozer installation
+      run: |
+        buildozer --version
+
+    - name: Clean previous builds
+      run: |
+        buildozer android clean || true
+
+    - name: Build APK with buildozer
+      env:
+        ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+        ANDROID_NDK_HOME: $HOME/android/ndk/25.2.9519653
+      run: |
+        buildozer -v android debug
+
+    - name: Find built APK
+      id: find-apk
+      run: |
+        APK=$(ls -1 bin/*.apk 2>/dev/null | head -n1 || echo "")
+        if [ -z "$APK" ]; then
+          echo "❌ No APK found in bin/"
+          ls -la bin/ || echo "bin/ doesn't exist"
+          exit 1
+        fi
+        echo "✅ Found APK: $APK"
+        echo "apk_path=$APK" >> $GITHUB_OUTPUT
+
+    - name: Generate keystore and sign APK
+      run: |
+        APK="${{ steps.find-apk.outputs.apk_path }}"
+        KEYSTORE=neuroquantum.keystore
+        
+        # Generate temporary keystore
+        keytool -genkeypair -v -keystore $KEYSTORE \
+          -alias neuroquantum -keyalg RSA -keysize 2048 -validity 10000 \
+          -storepass android -keypass android \
+          -dname "CN=NeuroQuantumAI, OU=Dev, O=NeuroQuantum, L=Warsaw, S=Mazovia, C=PL"
+        
+        # Zipalign
+        ZIPALIGN=$HOME/android/build-tools/33.0.2/zipalign
+        $ZIPALIGN -v -p 4 "$APK" aligned.apk
+        
+        # Sign with apksigner
+        APKSIGNER=$HOME/android/build-tools/33.0.2/apksigner
+        if [ -f "$APKSIGNER" ]; then
+          $APKSIGNER sign --ks $KEYSTORE \
+            --ks-pass pass:android --key-pass pass:android \
+            --out neuroquantumai-signed.apk aligned.apk
+        else
+          # Fallback to jarsigner
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+            -keystore $KEYSTORE -storepass android -keypass android \
+            aligned.apk neuroquantum
+          mv aligned.apk neuroquantumai-signed.apk
+        fi
+        
+        # Verify signature
+        if [ -f "$APKSIGNER" ]; then
+          $APKSIGNER verify -v neuroquantumai-signed.apk
+        fi
+        
+        ls -lh neuroquantumai-signed.apk
+        echo "✅ APK signed successfully!"
+
+    - name: Upload signed APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: neuroquantumai-apk-signed
+        path: neuroquantumai-signed.apk
+        retention-days: 30
+
+    - name: Create GitHub Release (optional)
+      if: github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v1.0-${{ github.run_number }}
+        name: NeuroQuantumAI APK Build ${{ github.run_number }}
+        body: |
+          🤖 **NeuroQuantumAI - Automatycznie zbudowany APK**
+          
+          📱 Pobierz `neuroquantumai-signed.apk` i zainstaluj na Samsung Galaxy A35 5G
+          
+          ✅ APK jest podpisany i gotowy do instalacji
+          🔧 Build #${{ github.run_number }}
+          📅 ${{ github.event.head_commit.timestamp }}
+          
+          ### Instrukcja instalacji:
+          1. Pobierz plik APK na telefon
+          2. Włącz "Nieznane źródła" w ustawieniach
+          3. Zainstaluj APK
+        files: neuroquantumai-signed.apk
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
